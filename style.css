@@ -1,0 +1,12 @@
+.container {
+    margin: 20px 0px;
+}
+
+.input-group {
+    margin-bottom: 20px;
+}
+
+.line {
+    border: 1px slateblue solid;
+    margin: 10px 10px;
+}
