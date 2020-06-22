@@ -4,58 +4,61 @@ let input = document.querySelector("#input");
 let listGroup = document.querySelector(".list-group");
 let taskAry = [];
 let taskCount = 0;
+let isTaskDone;
 
 // Listener event
-container.addEventListener('click', function(e){
+container.addEventListener('click', function (e) {
     if (e.target.id === "submit") {
         addTask();
-    }
-    else if (e.target.id === "clean-all") {
+        input.focus();
+    } else if (e.target.id === "clean-all") {
         cleanAllTask();
-    }
-    else if (e.target.className === "form-check-input" || e.target.className === "form-check-label") {
-        doneTask(e.target.dataset.id);
-        console.log(e.target.checked);
-    }
-    else if (e.target.nodeName === "SPAN") {
+    } else if (e.target.className === "form-check-input" || e.target.className === "form-check-label") {
+        if (document.querySelectorAll(".form-check-input")[e.target.dataset.id].checked) {
+            isTaskDone = true;
+        } else {
+            isTaskDone = false;
+        }
+        updateTaskStatus(e.target.dataset.id, isTaskDone);
+    } else if (e.target.nodeName === "SPAN") {
         deleteTask(e.target.dataset.id);
-        //console.log(e.target.dataset.id);
     }
-    //console.log(e.target.id);
 });
 
 // Function
-function addTask(){
+function addTask() {
     let taskContent = input.value;
     if (taskContent === "") {
         alert("Task不可為空");
-    }
-    else {
+    } else {
         const taskDetail = {
             task_content: taskContent,
             task_status: "on-going"
         };
         taskAry.push(taskDetail);
-        //console.log(taskAry);
         calculationTaskCount();
         render();
     }
 }
 
-function cleanAllTask(){
+function cleanAllTask() {
     taskAry.splice(0, taskAry.length);
     calculationTaskCount();
     render();
 }
 
-function doneTask(index){
-    taskAry[index].task_status = "done";
-    console.log(taskAry);
+function updateTaskStatus(index, isTaskDone) {
+    // Check checkbox status
+    if (isTaskDone) {
+        taskAry[index].task_status = "done";
+    } else {
+        taskAry[index].task_status = "on-going";
+    }
     calculationTaskCount();
     render();
 }
 
-function calculationTaskCount(){
+function calculationTaskCount() {
     taskCount = 0;
     taskAry.forEach(item => {
         if (item.task_status !== "done") {
@@ -64,33 +67,33 @@ function calculationTaskCount(){
     });
 }
 
-function deleteTask(index){
+function deleteTask(index) {
     taskAry.splice(index, 1);
     calculationTaskCount();
     render();
 }
 
-function render(){
+function render() {
     // Update list group
     let listGroupString = "";
     taskAry.forEach((item, index) => {
         listGroupString += `
         <li class="list-group-item" data-id="${index}">
             <div class="form-check mb-2">
-                <input class="form-check-input" data-id="${index}" type="checkbox" id="autoSizingCheck${index}">
-                <label class="form-check-label" data-id="${index}" for="autoSizingCheck${index}">
         `;
 
         if (item.task_status === "done") {
-            listGroupString += `<del> ${item.task_content} </del>`;
-            //document.querySelectorAll("form-check-input")[index].checked = true;
+            listGroupString += `
+            <input class="form-check-input" data-id="${index}" type="checkbox" id="autoSizingCheck${index}" checked>
+            <del> ${item.task_content} </del>`;
+        } else {
+            listGroupString += `
+            <input class="form-check-input" data-id="${index}" type="checkbox" id="autoSizingCheck${index}">
+            ${item.task_content}`;
         }
-        else {
-            listGroupString += `${item.task_content}`;
-            //document.querySelectorAll("form-check-input")[index].checked = false;
-        }          
-        
+
         listGroupString += `
+                    <label class="form-check-label" data-id="${index}" for="autoSizingCheck${index}">
                 </label>
                 <button type="button" class="close" aria-label="Close">
                     <span aria-hidden="true" data-id="${index}">&times;</span>
@@ -108,8 +111,6 @@ function render(){
     `
     listGroup.innerHTML = listGroupString;
 
-    //console.log(listGroupString);
-    
     // Clean input data
     input.value = "";
 }
